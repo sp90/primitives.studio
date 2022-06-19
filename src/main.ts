@@ -1,51 +1,43 @@
+import { WebGLRenderer } from "three";
+import { CamerasState } from "./camera";
+import { Renderer } from "./renderer";
+import { SceneState } from "./scene";
 import "./style.css";
-import {
-  AxesHelper,
-  BoxGeometry,
-  Mesh,
-  MeshBasicMaterial,
-  PerspectiveCamera,
-  Scene,
-  WebGLRenderer,
-} from "three";
-import handleResize from "./helpers/handleResize";
 
-const sizes = {
-  width: window.innerWidth,
-  height: window.innerHeight,
-};
+class Main {
+  canvas = document.querySelector<HTMLCanvasElement>(
+    "#webgl"
+  ) as HTMLCanvasElement;
+  sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  };
+  aspectRatio = this.sizes.width / this.sizes.height;
+  sceneState = new SceneState();
+  camerasState = new CamerasState();
+  renderer: Renderer = new Renderer(
+    this.sceneState.mainScene,
+    this.canvas,
+    this.camerasState.mainCamera
+  );
 
-let aspectRatio = sizes.width / sizes.height;
+  constructor() {
+    const _self = this;
 
-const canvas = document.querySelector<HTMLDivElement>("#webgl")!;
-const scene = new Scene();
+    this.sceneState.addBaseScene(this.camerasState.mainCamera);
+    this.renderer.initSceneRenderer((renderer: WebGLRenderer) => {
+      const tick = () => {
+        renderer.render(
+          _self.sceneState.mainScene,
+          _self.camerasState.mainCamera
+        );
 
-const mesh = new Mesh(
-  new BoxGeometry(1, 1, 1),
-  new MeshBasicMaterial({ color: "#ff0000" })
-);
+        window.requestAnimationFrame(tick);
+      };
 
-const camera = new PerspectiveCamera(
-  60,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  100
-);
-const axesHelper = new AxesHelper();
+      tick();
+    });
+  }
+}
 
-camera.position.set(3, 3, 3);
-camera.lookAt(mesh.position);
-
-scene.add(camera);
-scene.add(axesHelper);
-scene.add(mesh);
-
-const renderer = new WebGLRenderer({
-  canvas,
-});
-
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.render(scene, camera);
-
-handleResize(sizes, aspectRatio, camera, renderer);
+new Main();
