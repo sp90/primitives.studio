@@ -10,7 +10,6 @@ import {
   Scene,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import modelObjPath from "./public/room.glb?raw";
 
 export class SceneState {
   mainScene = new Scene();
@@ -33,20 +32,20 @@ export class SceneState {
     console.log(this.mainScene.children);
   }
 
-  loadGlb() {
-    const _self = this;
+  // loadGlb() {
+  //   const _self = this;
 
-    _self.loader.load(
-      modelObjPath,
-      (gltf) => {
-        _self.mainScene.add(gltf.scene);
-      },
-      undefined,
-      function (error) {
-        console.error(error);
-      }
-    );
-  }
+  //   _self.loader.load(
+  //     modelObjPath,
+  //     (gltf) => {
+  //       _self.mainScene.add(gltf.scene);
+  //     },
+  //     undefined,
+  //     function (error) {
+  //       console.error(error);
+  //     }
+  //   );
+  // }
 
   private addBasePlane() {
     const planeMaterial = new MeshStandardMaterial({ color: "0x999999" });
