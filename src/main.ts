@@ -1,4 +1,3 @@
-import { WebGLRenderer } from "three";
 import { CamerasState } from "./camera";
 import { Renderer } from "./renderer";
 import { SceneState } from "./scene";
@@ -16,27 +15,30 @@ class Main {
   sceneState = new SceneState();
   camerasState = new CamerasState();
   renderer: Renderer = new Renderer(
-    this.sceneState.mainScene,
+    this.sceneState,
     this.canvas,
     this.camerasState.mainCamera
   );
 
   constructor() {
-    const _self = this;
-
     this.sceneState.addBaseScene(this.camerasState.mainCamera);
-    this.renderer.initSceneRenderer((renderer: WebGLRenderer) => {
-      const tick = () => {
-        renderer.render(
-          _self.sceneState.mainScene,
-          _self.camerasState.mainCamera
-        );
-
-        window.requestAnimationFrame(tick);
-      };
-
-      tick();
+    this.renderer.init(() => {
+      this.sceneState.updatePhyisics();
     });
+
+    this.camerasState.mainCamera.position.set(8, 12, 8);
+    this.camerasState.mainCamera.lookAt(-3, 0, -3);
+
+    // const controls = new OrbitControls(
+    //   this.camerasState.mainCamera,
+    //   renderer.domElement
+    // );
+
+    // controls.enableDamping = true;
+    // controls.enablePan = true;
+    // controls.dampingFactor = 0.3;
+    // controls.minDistance = 10;
+    // controls.maxDistance = 500;
   }
 }
 

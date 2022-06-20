@@ -1,35 +1,55 @@
+import { World } from "cannon-es";
 import {
   PCFSoftShadowMap,
   PerspectiveCamera,
   Scene,
+  sRGBEncoding,
   WebGLRenderer,
 } from "three";
 import { DEFAULT_CAMERA_OPTIONS } from "./camera";
+import { SceneState } from "./scene";
 
 export class Renderer {
+  private timeStep = 1 / 60;
   private scene: Scene;
+  private world: World;
   private camera: PerspectiveCamera;
   private renderer: WebGLRenderer;
 
   constructor(
-    scene: Scene,
+    sceneState: SceneState,
     canvas: HTMLCanvasElement,
     camera: PerspectiveCamera
   ) {
-    this.scene = scene;
+    this.scene = sceneState.mainScene;
+    this.world = sceneState.mainWorld;
     this.camera = camera;
     this.renderer = new WebGLRenderer({
       canvas,
+      antialias: true,
     });
   }
 
-  initSceneRenderer(animationTick: Function) {
+  init(cb?: Function) {
     this.baseRendererSettings(this.renderer);
     this.handleResize(this.renderer);
 
-    animationTick(this.renderer);
+    cb && this.startAnimationTicks(cb);
 
     return this.renderer;
+  }
+
+  private startAnimationTicks(cb: Function) {
+    const tick = () => {
+      this.renderer.render(this.scene, this.camera);
+      this.world.fixedStep(this.timeStep);
+
+      cb(this.renderer);
+
+      window.requestAnimationFrame(tick);
+    };
+
+    tick();
   }
 
   private baseRendererSettings(renderer: WebGLRenderer) {
@@ -38,11 +58,11 @@ export class Renderer {
       DEFAULT_CAMERA_OPTIONS.height
     );
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.scene?.fog && renderer.setClearColor(this.scene.fog.color);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap;
+    renderer.outputEncoding = sRGBEncoding;
     renderer.render(this.scene, this.camera);
-
-    console.log("hello");
   }
 
   private handleResize(renderer: WebGLRenderer) {
